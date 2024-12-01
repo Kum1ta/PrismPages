@@ -42,8 +42,10 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	container: {
-		position: 'absolute',
-		bottom: 0,
+		// position: 'absolute',
+		// bottom: 0,
+		marginTop: 'auto',
+		marginBottom: 0,
 		backgroundColor: '#262626',
 		height: 75,
 		width: '100%',

@@ -1,44 +1,87 @@
 import React from 'react';
-import {Text, View, StyleSheet, TextInput, ScrollView, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, TextInput, ScrollView, TouchableOpacity, FlatList, Dimensions} from 'react-native';
 import { Image } from 'react-native';
+import { parseDocument } from 'htmlparser2';
+import { selectAll, selectOne } from 'css-select';
+const { height } = Dimensions.get('window');
+
+const urlAnimeSama = 'https://anime-sama.fr/catalogue/listing_all.php';
+
+let animeList: any = null;
+let interval: any = null;
 
 const HomePage = () => {
+	const [animes, setAnimes] = React.useState([]);
+	React.useEffect(() => {
+		if (animeList)
+		{
+			setAnimes(animeList);
+			return;
+		}
+		fetchAnimeSama().then((data) => {
+			animeList = data;
+			setAnimes(data);
+		});
+	}, []);
 	return (
 		<View style={styles.container}>
 			<Text style={styles.titleText}>PrismPages</Text>
-			<TextInput
+				<TextInput
 				style={styles.searchBar}
 				placeholder='Rechercher'
 				placeholderTextColor="#989898"
+				/>
+			{loading(animes)}
+			<FlatList
+				data={animes}
+				keyExtractor={(item, index) => index.toString()}
+				numColumns={2} 
+				renderItem={({ item }) => newAnime(item.name, item.imgUrl, item.pageUrl)}
+				initialNumToRender={20}
+				maxToRenderPerBatch={20}
+				style={styles.flatList}
 			/>
-			<ScrollView style={{width: '100%'}}>
-				<View style={styles.results}>
-					{newAnime('xZNxkzbKJnxbzKjxbzKxbZKbzNxbZMNbz', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-					{newAnime('Manga', 'https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630', '')}
-				</View>
-			</ScrollView>
 		</View>
 	);
 };
 
+
+function loading(animes: any)
+{
+	const [loadingText, setLoadingText] = React.useState("Loading...");
+
+	if (!animes || animes.length === 0)
+	{
+		if (interval)
+			return (<Text style={styles.loadingText}>{loadingText}</Text>);
+		let i = 0;
+		interval = setInterval(() => {
+			if (animeList && animeList.length > 0)
+			{
+				clearInterval(interval);
+				return;
+			}
+			i++;
+			if (i > 3)
+				i = 0;
+			let text = "Loading";
+			for (let j = 0; j < i; j++)
+				text += ".";
+			setLoadingText(text);
+			
+		}, 500);
+		return (
+			<Text style={styles.loadingText}>{loadingText}</Text>
+		);
+	}
+	return (null);
+
+}
+
 function newAnime(name: string, imgUrl: string, pageUrl: string)
 {
 	return (
-		<TouchableOpacity onPress={() => console.log('pressed')} style={styles.scan}>
+		<TouchableOpacity onPress={() => console.log('pressed')} style={styles.scan} key={pageUrl}>
 			<View>
 				<Image style={styles.imageScans} source={{uri: imgUrl}}/>
 				<Text style={styles.titleScans} numberOfLines={2}>{name}</Text>
@@ -47,21 +90,57 @@ function newAnime(name: string, imgUrl: string, pageUrl: string)
 	);
 }
 
+async function fetchAnimeSama()
+{
+	const data = await fetch(urlAnimeSama);
+	let html = await data.text();
+	let arr = [];
+	
+	const dom = parseDocument(html);
+	const scans = selectAll('.Scans', dom);
+	let i = 0;
+	for (; i < scans.length; i++)
+	{
+		const scan = scans[i];
+		let	scan_title;
+		let scan_img;
+		let scan_url;
+
+		scan_title = selectOne('h1', scan)?.children.length > 0 ? selectOne('h1', scan).children[0].data : null;
+		if (!scan_title)
+			continue;
+		scan_img = selectOne('img', scan)?.attribs.src;
+		scan_url = selectOne('a', scan)?.attribs.href;
+		if (scan_title && scan_img && scan_url)
+			arr.push({ name: scan_title, imgUrl: scan_img, pageUrl: scan_url });
+	}
+	return (arr);
+}
 
 const styles = StyleSheet.create({
 	container: {
-		height: '100%',
+		height: height - 75,
 		width: '100%',
 		padding: 10,
 		display: 'flex',
 		flexDirection: 'column',
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	titleText: {
 		color: 'white',
 		marginTop: 5,
 		fontSize: 32,
 		fontFamily: 'Jersey25-Regular',
+	},
+	loadingText: {
+		color: 'white',
+		marginTop: 5,
+		fontSize: 32,
+		fontFamily: 'Jersey25-Regular',
+		position: 'absolute',
+		top: '50%',
+		left: '50%',
+		transform: [{translateX: -50}, {translateY: -50}],
 	},
 	searchBar: {
 		width: '95%',
@@ -74,18 +153,14 @@ const styles = StyleSheet.create({
 		fontFamily: 'Jersey25-Regular',
 		fontSize: 20
 	},
-	results: {
-		paddingInline: 25,
-		paddingTop: 20,
-		paddingBottom: 20,
-		marginBottom: 65,
+	flatList: {
 		width: '100%',
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'space-between',
+		display: 'flex',
+		padding: 10,
 	},
 	scan: {
 		width: '48%',
+		margin: '1%',
 		marginBottom: 20,
 		flexDirection: 'column',
 	},
@@ -98,7 +173,7 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		margin: 2.5,
 		fontSize: 24,
-	}
+	},
 });
 
 export default HomePage;
