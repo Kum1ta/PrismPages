@@ -1,10 +1,10 @@
 import React from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import HomePage from './srcs/homePage';
+import DefaultParent from './srcs/DefaultParent';
 
 const Default = () => {
 	return (
-		<HomePage />
+		<DefaultParent />
 	);
 };
 
