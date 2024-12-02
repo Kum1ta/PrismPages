@@ -1,12 +1,16 @@
 import React, {useState} from 'react';
 import {Text, View, StyleSheet, Image, Touchable, TouchableOpacity} from 'react-native';
-import HomePage from './homePage';
+import HomePage from './HomePage';
+import ScanPage from './ScanPage';
 
 const DefaultParent = () =>
 {
 	const	[buttonSelectedId, setButtonSelectedId] = useState(1);
-	const	page = [null, <HomePage/>, null]
+	const	[selectedScan, setSelectedScan] = useState(null);
+	const	page = [null, <HomePage setSelectedScan={setSelectedScan}/>, null];
 
+	if (selectedScan)
+		return (<ScanPage scan={selectedScan}/>);
 	return (
 		<View style={styles.body}>
 			{page[buttonSelectedId]}
@@ -42,8 +46,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	container: {
-		// position: 'absolute',
-		// bottom: 0,
 		marginTop: 'auto',
 		marginBottom: 0,
 		backgroundColor: '#262626',

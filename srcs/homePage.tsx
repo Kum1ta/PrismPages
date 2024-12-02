@@ -10,7 +10,7 @@ const urlAnimeSama = 'https://anime-sama.fr/catalogue/listing_all.php';
 let animeList: any = null;
 let interval: any = null;
 
-const HomePage = () => {
+const HomePage = ({setSelectedScan}: any) => {
 	const [animes, setAnimes] = React.useState([]);
 	React.useEffect(() => {
 		if (animeList)
@@ -27,24 +27,37 @@ const HomePage = () => {
 		<View style={styles.container}>
 			<Text style={styles.titleText}>PrismPages</Text>
 				<TextInput
-				style={styles.searchBar}
-				placeholder='Rechercher'
-				placeholderTextColor="#989898"
+					style={styles.searchBar}
+					placeholder='Rechercher'
+					placeholderTextColor="#989898"
+					onChangeText={(text) => setAnimes(search(animeList, text))}
 				/>
 			{loading(animes)}
 			<FlatList
 				data={animes}
 				keyExtractor={(item, index) => index.toString()}
 				numColumns={2} 
-				renderItem={({ item }) => newAnime(item.name, item.imgUrl, item.pageUrl)}
+				renderItem={({ item }) => newAnime(item.name, item.imgUrl, item.pageUrl, setSelectedScan)}
 				initialNumToRender={20}
 				maxToRenderPerBatch={20}
 				style={styles.flatList}
 			/>
 		</View>
 	);
-};
+}
 
+function search(animes: any, text: string)
+{
+	if (!animes)
+		return;
+	let arr = [];
+	for (let i = 0; i < animes.length; i++)
+	{
+		if (animes[i].name.includes(text))
+			arr.push(animes[i]);
+	}
+	return (arr);
+}
 
 function loading(animes: any)
 {
@@ -78,10 +91,10 @@ function loading(animes: any)
 
 }
 
-function newAnime(name: string, imgUrl: string, pageUrl: string)
+function newAnime(name: string, imgUrl: string, pageUrl: string, setSelectedScan: Function)
 {
 	return (
-		<TouchableOpacity onPress={() => console.log('pressed')} style={styles.scan} key={pageUrl}>
+		<TouchableOpacity onPress={() => setSelectedScan([pageUrl, name])} style={styles.scan} key={pageUrl}>
 			<View>
 				<Image style={styles.imageScans} source={{uri: imgUrl}}/>
 				<Text style={styles.titleScans} numberOfLines={2}>{name}</Text>
