@@ -26,32 +26,12 @@ function ScanPage({scan}: any)
 			return (response.text());
 		})
 		.then((text) => {
+			text = removeAllComments(text, '//');
 			text = newMethodScans(text, data, scan[1]);
-			text = '{' + text + '}';
-			text = text.replaceAll('var ', '"');
-			text = text.replaceAll('= ', '":'); 
-			text = text.replaceAll('];', '],');
-			text = text.replaceAll("'", '"');
-			text = text.replaceAll('],\n\n', '],');
-			text = text.replaceAll(',}', '}');
-			for (let i = 0; i < text.length; i++)
-			{
-				if (text[i] === ',')
-				{
-					let j = i + 1;
-					while (j < text.length && (text[j] === ' ' || text[j] === '\n'))
-						j++;
-					if (text[j] === ']')
-						text = text.slice(0, i) + text.slice(i + 1);
-				}
-			}
-			console.log(text);
-			let parsed = JSON.parse(text);
-			parsed = {...parsed, ...data};
+			text = parsingData(text);
+			let parsed = {...JSON.parse(text), ...data};
 			setScanData(parsed);
 			setNbChapter(Object.keys(parsed).length);
-			console.log('Size:', Object.keys(parsed).length);
-			console.log(parsed);
 		})
 		.catch((error) => console.warn('Erreur lors du fetch:', error));
 	}
@@ -68,6 +48,88 @@ function ScanPage({scan}: any)
 			</ScrollView>
 		</View>
 	);
+}
+
+function removeAllComments(text: string, comment: string)
+{
+	let	pos;
+	let	posEnd;
+	
+	pos = text.indexOf(comment);
+	while (pos !== -1)
+	{
+		if (comment === '//' && text[pos - 1] === ':')
+		{
+			pos = text.indexOf(comment, pos + 1);
+			continue;
+		}
+		if (comment === '//')
+			posEnd = text.indexOf('\n', pos);
+		else
+			posEnd = text.indexOf('*/', pos);
+		if (posEnd === -1)
+			break;
+		text = text.slice(0, pos) + text.slice(posEnd + 1);
+		pos = text.indexOf(comment, pos);
+	}
+	if (comment === '//')
+		text = removeAllComments(text, '/*');
+	return (text);
+}
+
+function isWhitespace(char: string)
+{
+	return (/^\s$/.test(char));
+  }
+
+function parsingData(text: string)
+{
+	text = '{' + text;
+	text = text.replaceAll('var ', '"');
+	for (let i = 0; i < text.length; i++)
+	{
+		if (text[i] === '=')
+		{
+			let j = i - 1;
+			while (j > 0 && isWhitespace(text[j]))
+				j--;
+			if (text[j] >= '0' && text[j] <= '9')
+			{
+				j = i + 1;
+				while (j < text.length && isWhitespace(text[j]))
+					j++;
+				if (text[j] === '[')
+					text = text.slice(0, i) + '":' + text.slice(i + 1);
+			}
+		}
+	}
+	for (let i = text.length - 1; i > 0; i--)
+	{
+		if (text[i] === ']')
+		{
+			while (i > 0 && text[i] !== ',')
+				i--;
+			if (text[i] === ',')
+				text = text.slice(0, i) + text.slice(i + 1);
+		}
+	}
+	for (let i = 0; i < text.length; i++)
+	{
+		if (text[i] === ']')
+		{
+			while (i < text.length && text[i] !== ';')
+				i++;
+			if (text[i] === ';')
+				text = text.slice(0, i) + ',' + text.slice(i + 1);
+		}
+
+	}
+	let pos = text.length - 1;
+	while (pos > 0 && text[pos] !== ']')
+		pos--;
+	text = text.slice(0, pos + 1) + '}'
+	text = text.replaceAll('\'', '"');
+	return (text);
 }
 
 function newMethodScans(text: string, data: any, name: string)
