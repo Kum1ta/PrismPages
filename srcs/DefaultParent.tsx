@@ -10,7 +10,7 @@ const DefaultParent = () =>
 	const	page = [null, <HomePage setSelectedScan={setSelectedScan}/>, null];
 
 	if (selectedScan)
-		return (<ScanPage scan={selectedScan}/>);
+		return (<ScanPage scan={selectedScan} setSelectedScan={setSelectedScan}/>);
 	return (
 		<View style={styles.body}>
 			{page[buttonSelectedId]}

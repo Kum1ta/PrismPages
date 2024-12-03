@@ -94,7 +94,7 @@ function loading(animes: any)
 function newAnime(name: string, imgUrl: string, pageUrl: string, setSelectedScan: Function)
 {
 	return (
-		<TouchableOpacity onPress={() => setSelectedScan([pageUrl, name])} style={styles.scan} key={pageUrl}>
+		<TouchableOpacity onPress={() => setSelectedScan([pageUrl, name, imgUrl])} style={styles.scan} key={pageUrl}>
 			<View>
 				<Image style={styles.imageScans} source={{uri: imgUrl}}/>
 				<Text style={styles.titleScans} numberOfLines={2}>{name}</Text>
