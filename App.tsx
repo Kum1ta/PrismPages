@@ -1,5 +1,5 @@
 import React from 'react';
-import DefaultParent from './srcs/DefaultParent';
+import {DefaultParent} from './srcs/DefaultParent';
 
 const Default = () => {
 	return (

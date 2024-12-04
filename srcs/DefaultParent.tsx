@@ -1,19 +1,32 @@
 import React, {useState} from 'react';
-import {Text, View, StyleSheet, Image, Touchable, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Image, TouchableOpacity, Dimensions} from 'react-native';
 import HomePage from './HomePage';
 import ScanPage from './ScanPage';
+import ReadingPage from './ReadingPage';
+
 
 const DefaultParent = () =>
 {
 	const	[buttonSelectedId, setButtonSelectedId] = useState(1);
 	const	[selectedScan, setSelectedScan] = useState(null);
+	const	[reading, setReading] = useState({bool: false, scan: null, chapter: 1});
 	const	page = [null, <HomePage setSelectedScan={setSelectedScan}/>, null];
 
+	if (reading.bool)
+		return (<ReadingPage reading={reading} setReading={setReading} selectedScan={selectedScan}/>);
 	if (selectedScan)
-		return (<ScanPage scan={selectedScan} setSelectedScan={setSelectedScan}/>);
+	{
+		return (<ScanPage
+					scan={selectedScan}
+					setSelectedScan={setSelectedScan}
+					setReading={setReading}
+		/>);
+	}
 	return (
 		<View style={styles.body}>
-			{page[buttonSelectedId]}
+			<View style={styles.content}>
+				{page[buttonSelectedId]}
+			</View>
 			<View style={styles.container}>
 				{createButton(() => setButtonSelectedId(0), require('../assets/icons/home.png'), 0, buttonSelectedId)}
 				{createButton(() => setButtonSelectedId(1), require('../assets/icons/home.png'), 1, buttonSelectedId)}
@@ -44,17 +57,17 @@ const styles = StyleSheet.create({
 		backgroundColor: '#2A2D34',
 		alignItems: 'center',
 		justifyContent: 'center',
+		height: '100%',
+		width: '100%',
+	},
+	content: {
+		width: '100%',
 	},
 	container: {
-		marginTop: 'auto',
-		marginBottom: 0,
 		backgroundColor: '#262626',
 		height: 75,
 		width: '100%',
-		shadowColor: 'black',
-		shadowOffset: {width: 0, height: 10},
-		shadowOpacity: 0.8,
-		shadowRadius: 10,
+		marginTop: 'auto',
 		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'space-between',
@@ -70,7 +83,7 @@ const styles = StyleSheet.create({
 		height: 58,
 		width: 58,
 		tintColor: 'white'
-	}
+	},
 });
 
-export default DefaultParent;
+export {DefaultParent};

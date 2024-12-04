@@ -1,38 +1,38 @@
-import React, {useState} from 'react';
-import {ScrollView, StyleSheet, Text, Touchable, TouchableOpacity, View, Image} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {ScrollView, StyleSheet, Text, BackHandler, TouchableOpacity, View, Image} from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
+import { parseDocument } from 'htmlparser2';
+import { selectOne } from 'css-select';
+
 /*
 	scan[0] = pageUrl
 	scan[1] = name
 	scan[2] = imgUrl
 */
 
-function ScanPage({scan, setSelectedScan}: any)
+function ScanPage({scan, setSelectedScan, setReading}: any)
 {
 	const	[scanData, setScanData] = useState(null);
 	const	[nbChapter, setNbChapter] = useState(0);
+	const	[synopsis, setSynopsis] = useState(null);
 	let		data = {};
+	let		website = 'https://anime-sama.fr/catalogue/';
 
-
-	console.log(setSelectedScan);
-	scan[0] += "/scan/vf/episodes.js";
+	useEffect(() => {
+		function onBackPress()
+		{
+			setSelectedScan(null);
+			return (true);
+		}
+		BackHandler.addEventListener('hardwareBackPress', onBackPress);
+		return (() => BackHandler.removeEventListener('hardwareBackPress', onBackPress));
+	});
+	if (!scan[0].includes('/scan/vf/episodes.js'))
+		scan[0] += "/scan/vf/episodes.js";
 	if (!scanData)
 	{
-		fetch(scan[0])
-		.then((response) => {
-			if (!response.ok)
-				throw new Error('Network response was not ok');
-			return (response.text());
-		})
-		.then((text) => {
-			text = removeAllComments(text, '//');
-			text = newMethodScans(text, data, scan[1]);
-			text = parsingData(text);
-			let parsed = {...JSON.parse(text), ...data};
-			setScanData(parsed);
-			setNbChapter(Object.keys(parsed).length);
-		})
-		.catch((error) => console.warn('Erreur lors du fetch:', error));
+		getDataChapters(data, scan, setScanData, setNbChapter);
+		getSynopsis(website, scan, setSynopsis);
 	}
 	return (
 		<View style={styles.body}>
@@ -56,9 +56,12 @@ function ScanPage({scan, setSelectedScan}: any)
 				<Text style={styles.titleScan}>{scan[1]}</Text>
 			</View>
 			<ScrollView>
+				<Text style={styles.h2Text}>Synopsis</Text>
+				<Text style={styles.synopsis}>{synopsis}</Text>
+				<Text style={styles.h2Text}>Chapitres</Text>
 				<View style={styles.chapScrollView}>
 					{Array.from({ length: nbChapter }, (_, index) => (
-						<TouchableOpacity key={index} style={styles.chapButton}>
+						<TouchableOpacity key={index} style={styles.chapButton} onPress={() => setReading({bool: true, scan: scanData, chapter: index + 1})}>
 							<Text style={styles.buttonText}>{index + 1}</Text>
 						</TouchableOpacity>
 					))}
@@ -226,6 +229,56 @@ function createAllUrl(data: any, nbChatper: number, nbPages: number, name: strin
 		data['eps' + nbChatper].push(url + name.replaceAll(' ', '%20') + '/' + nbChatper + '/' + (i + 1) + '.jpg');
 }
 
+function getDataChapters(data: any, scan: any, setScanData: any, setNbChapter: any)
+{
+	fetch(scan[0])
+	.then((response) => {
+		if (!response.ok)
+			throw new Error('Network response was not ok');
+		return (response.text());
+	})
+	.then((text) => {
+		text = removeAllComments(text, '//');
+		text = newMethodScans(text, data, scan[1]);
+		text = parsingData(text);
+		let parsed = {...JSON.parse(text), ...data};
+		setScanData(parsed);
+		setNbChapter(Object.keys(parsed).length);
+	})
+	.catch((error) => console.warn('Error fetch (Chapters):', error));
+}
+
+function getSynopsis(website: string, scan: any, setSynopsis: any)
+{
+	website += scan[1].replaceAll(' ', '-');
+	website = website.toLowerCase();
+	website = removeUselessChar(website);
+	fetch(website)
+	.then((response) => {
+		if (!response.ok)
+			throw new Error('Network response was not ok');
+		return (response.text());
+	})
+	.then((text) => {
+		const dom = parseDocument(text);
+		setSynopsis(selectOne('.text-sm.text-gray-400.mt-2', dom)?.children[0].data);
+	})
+	.catch((error) => console.warn('Error fetch (Synopsis):', error));
+}
+
+function removeUselessChar(text: string)
+{
+	text = text.replaceAll('#', '');
+	text = text.replaceAll('&', 'and');
+	text = text.replaceAll('\'', '');
+	text = text.replaceAll(',', '');
+	text = text.replaceAll('!', '');
+	text = text.replaceAll('(', '');
+	text = text.replaceAll(')', '');
+	text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+	return (text);
+}
+
 const styles = StyleSheet.create({
 	body: {
 		backgroundColor: '#2A2D34',
@@ -237,6 +290,7 @@ const styles = StyleSheet.create({
 	imgTop: {
 		width: '100%',
 		height: 200,
+		marginBottom: 15,
 	},
 	shadow: {
 		position: 'absolute',
@@ -263,6 +317,7 @@ const styles = StyleSheet.create({
 		margin: 5,
 		display: 'flex',
 		justifyContent: 'center',
+		borderRadius: 10,
 	},
 	buttonText: {
 		color: 'white',
@@ -289,6 +344,21 @@ const styles = StyleSheet.create({
 		color: 'white',
 		fontFamily: 'Jersey25-Regular',
 		fontSize: 34,
+	},
+	h2Text: {
+		color: 'white',
+		fontFamily: 'Jersey25-Regular',
+		fontSize: 28,
+		marginTop: 25,
+		marginLeft: 15,
+	},
+	synopsis: {
+		color: '#BFBFBF',
+		fontFamily: 'Jersey25-Regular',
+		fontSize: 20,
+		marginTop: 5,
+		marginLeft: '5%',
+		marginRight: '5%',
 	},
 });
 

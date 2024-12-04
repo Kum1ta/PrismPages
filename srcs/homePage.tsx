@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Text, View, StyleSheet, TextInput, ScrollView, TouchableOpacity, FlatList, Dimensions} from 'react-native';
 import { Image } from 'react-native';
 import { parseDocument } from 'htmlparser2';
@@ -12,6 +12,7 @@ let interval: any = null;
 
 const HomePage = ({setSelectedScan}: any) => {
 	const [animes, setAnimes] = React.useState([]);
+
 	React.useEffect(() => {
 		if (animeList)
 		{
@@ -26,17 +27,17 @@ const HomePage = ({setSelectedScan}: any) => {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.titleText}>PrismPages</Text>
-				<TextInput
-					style={styles.searchBar}
-					placeholder='Rechercher'
-					placeholderTextColor="#989898"
-					onChangeText={(text) => setAnimes(search(animeList, text))}
-				/>
+			<TextInput
+				style={styles.searchBar}
+				placeholder='Rechercher'
+				placeholderTextColor="#989898"
+				onChangeText={(text) => setAnimes(search(animeList, text))}
+			/>
 			{loading(animes)}
 			<FlatList
 				data={animes}
 				keyExtractor={(item, index) => index.toString()}
-				numColumns={2} 
+				numColumns={3} 
 				renderItem={({ item }) => newAnime(item.name, item.imgUrl, item.pageUrl, setSelectedScan)}
 				initialNumToRender={20}
 				maxToRenderPerBatch={20}
@@ -81,7 +82,6 @@ function loading(animes: any)
 			for (let j = 0; j < i; j++)
 				text += ".";
 			setLoadingText(text);
-			
 		}, 500);
 		return (
 			<Text style={styles.loadingText}>{loadingText}</Text>
@@ -132,12 +132,20 @@ async function fetchAnimeSama()
 
 const styles = StyleSheet.create({
 	container: {
-		height: height - 75,
 		width: '100%',
+		height: height - 75,
 		padding: 10,
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
+	},
+	topContainer: {
+		width: '100%',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		position: 'absolute',
+		top: 0,
 	},
 	titleText: {
 		color: 'white',
@@ -172,7 +180,7 @@ const styles = StyleSheet.create({
 		padding: 10,
 	},
 	scan: {
-		width: '48%',
+		width: '31.33%',
 		margin: '1%',
 		marginBottom: 20,
 		flexDirection: 'column',
@@ -185,7 +193,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'Jersey25-Regular',
 		textAlign: 'center',
 		margin: 2.5,
-		fontSize: 24,
+		fontSize: 20,
 	},
 });
 
