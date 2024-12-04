@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, ScrollView} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
@@ -9,8 +9,8 @@ let index = 0;
 const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	const [hide, setHide] = useState(true);
 	const [imageHeights, setImageHeights] = useState<Record<number, number>>({});
-	const [reloadKeys, setReloadKeys]: any = useState({});
 	const [loadedImages, setLoadedImages] = useState<string[]>([]);
+	const [textLoading, setTextLoading] = useState<string>(`Loading ${index + 1}/${reading.scan['eps' + reading.chapter].length} images`);
 	const flatListRef = useRef(null);
 
 	useEffect(() => {
@@ -18,16 +18,15 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		{
 			const uri = reading.scan['eps' + reading.chapter][index];
 			calculateImageHeight(uri, index);
-			console.log('calculating image height for index:', index);
 
-			let fileName = uri.split('/').pop();
-			const localPath = `${RNFS.CachesDirectoryPath}/${fileName}.jpg`;
+			let fileName = selectedScan[1].replace(/[^a-zA-Z0-9]/g, '') + '-' + reading.chapter + '-' + (index + 1);
+			const localPath = `file://${RNFS.CachesDirectoryPath}/${fileName}.jpg`;
 
 			RNFS.exists(localPath).then((exists) => {
 				new Promise((resolve) => {
 					if (exists)
 					{
-						loadedImages.push('file:/' + localPath);
+						loadedImages.push(localPath);
 						resolve(null);
 					}
 					else
@@ -36,7 +35,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 							fromUrl: uri,
 							toFile: localPath,
 						}).promise.then(() => {
-							loadedImages.push('file:/' + localPath);
+							loadedImages.push(localPath);
 							resolve(null);
 						}).catch((err) => {
 							console.error(err);
@@ -47,9 +46,14 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 					{
 						console.log('All images loaded');
 						console.log('loadedImages:', loadedImages);
+						loadedImages.sort((a, b) => {
+							return a.localeCompare(b, undefined, { numeric: true });
+						});
+						setLoadedImages([...loadedImages]);
 					}
+					else
+						setTextLoading(`Loading ${loadedImages.length}/${reading.scan['eps' + reading.chapter].length} images`);
 				});
-
 			}).catch((err) => {
 				console.error(err);
 			});
@@ -64,7 +68,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 
 		BackHandler.addEventListener('hardwareBackPress', onBackPress);
 		return (() => {BackHandler.removeEventListener('hardwareBackPress', onBackPress); index = 0;});
-	}, []);
+	}, [reading.chapter]);
 
 	const calculateImageHeight = (uri: string, index: number) => {
 		Image.getSize(
@@ -84,25 +88,34 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 
 	const handlePrevious = useCallback(() => {
 		flatListRef.current?.scrollToOffset({ animated: false, offset: 0 });
-		index = 0;
+		setImageHeights({});
+		setLoadedImages([]);
+		setTextLoading(`Loading 0/${reading.scan['eps' + (reading.chapter - 1)].length} images`);
 		setReading({ bool: true, scan: reading.scan, chapter: reading.chapter - 1 });
+		index = 0;
 	}, [reading, setReading]);
 
 	const handleNext = useCallback(() => {
 		flatListRef.current?.scrollToOffset({ animated: false, offset: 0 });
+		setImageHeights({});
+		setLoadedImages([]);
+		setTextLoading(`Loading 0/${reading.scan['eps' + (reading.chapter + 1)].length} images`);
 		setReading({ bool: true, scan: reading.scan, chapter: reading.chapter + 1 });
+		index = 0;
 	}, [reading, setReading]);
 
 	const renderItem = useCallback(
 		({ item, index } :any) => (
-			<Image
-				// key={reloadKeys[index]} 
-				source={{ uri: [console.log("Hello: ", item), item.replace('file://', '')][1] }}
+			<FastImage
+				source={{
+					uri: item,
+					priority: index === 0 ? FastImage.priority.high : FastImage.priority.low,
+				}}
 				style={{
 					width: width,
 					height: imageHeights[index],
 				}}
-				// resizeMode="contain"
+				resizeMode={FastImage.resizeMode.contain}
 			/>
 		),
 		[imageHeights, calculateImageHeight]
@@ -116,7 +129,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	return (
 		<View style={styles.body}>
 			{loadedImages.length !== reading.scan['eps' + reading.chapter].length ? (
-				<Text style={styles.title}>Loading...</Text>
+				<Text style={[styles.title, {position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -100}, {translateY: -50}]}]}>{textLoading}</Text>
 			) : (
 				<>
 					<StatusBar hidden={hide} />
