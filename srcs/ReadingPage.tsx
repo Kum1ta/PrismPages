@@ -1,20 +1,20 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, ScrollView} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
 const width = Dimensions.get('window').width;
-let index = 0;
 
 const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
-	const [hide, setHide] = useState(true);
+	const [hide, setHide] = useState(false);
 	const [imageHeights, setImageHeights] = useState<Record<number, number>>({});
 	const [loadedImages, setLoadedImages] = useState<string[]>([]);
-	const [textLoading, setTextLoading] = useState<string>(`Loading ${index + 1}/${reading.scan['eps' + reading.chapter].length} images`);
+	const [textLoading, setTextLoading] = useState<string>(`Loading 0/${reading.scan['eps' + reading.chapter].length} images`);
 	const flatListRef = useRef(null);
 
 	useEffect(() => {
-		while (index < reading.scan['eps' + reading.chapter].length)
+		setHide(false);
+		for (let index: number = 0; index < reading.scan['eps' + reading.chapter].length; index++)
 		{
 			const uri = reading.scan['eps' + reading.chapter][index];
 			calculateImageHeight(uri, index);
@@ -44,8 +44,6 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 				}).then(() => {
 					if (loadedImages.length === reading.scan['eps' + reading.chapter].length)
 					{
-						console.log('All images loaded');
-						console.log('loadedImages:', loadedImages);
 						loadedImages.sort((a, b) => {
 							return a.localeCompare(b, undefined, { numeric: true });
 						});
@@ -57,8 +55,6 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 			}).catch((err) => {
 				console.error(err);
 			});
-
-			index++;
 		}
 		function onBackPress()
 		{
@@ -92,7 +88,6 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		setLoadedImages([]);
 		setTextLoading(`Loading 0/${reading.scan['eps' + (reading.chapter - 1)].length} images`);
 		setReading({ bool: true, scan: reading.scan, chapter: reading.chapter - 1 });
-		index = 0;
 	}, [reading, setReading]);
 
 	const handleNext = useCallback(() => {
@@ -101,22 +96,23 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		setLoadedImages([]);
 		setTextLoading(`Loading 0/${reading.scan['eps' + (reading.chapter + 1)].length} images`);
 		setReading({ bool: true, scan: reading.scan, chapter: reading.chapter + 1 });
-		index = 0;
 	}, [reading, setReading]);
 
 	const renderItem = useCallback(
 		({ item, index } :any) => (
-			<FastImage
-				source={{
-					uri: item,
-					priority: index === 0 ? FastImage.priority.high : FastImage.priority.low,
-				}}
-				style={{
-					width: width,
-					height: imageHeights[index],
-				}}
-				resizeMode={FastImage.resizeMode.contain}
-			/>
+			<TouchableWithoutFeedback onPress={() => {setHide(!hide); console.log('hide:', hide);}}>
+				<FastImage
+					source={{
+						uri: item,
+						priority: index === 0 ? FastImage.priority.high : FastImage.priority.low,
+					}}
+					style={{
+						width: width,
+						height: imageHeights[index],
+					}}
+					resizeMode={FastImage.resizeMode.contain}
+				/>
+			</TouchableWithoutFeedback>
 		),
 		[imageHeights, calculateImageHeight]
 	);
@@ -129,10 +125,11 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	return (
 		<View style={styles.body}>
 			{loadedImages.length !== reading.scan['eps' + reading.chapter].length ? (
-				<Text style={[styles.title, {position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -100}, {translateY: -50}]}]}>{textLoading}</Text>
+				<Text style={[styles.title, styles.loadingText]}>{textLoading}</Text>
 			) : (
 				<>
 					<StatusBar hidden={hide} />
+					{!hide && 
 					<View style={styles.topBar}>
 						<TouchableOpacity onPress={() => setReading({ bool: false, scan: null, chapter: 1 })} style={styles.arrowBack}>
 							<Image source={require('../assets/icons/arrow.png')} style={{ width: '100%', height: '100%' }} />
@@ -142,7 +139,8 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 							<Text style={[styles.title, { textAlign: 'center' }]}>CHAP</Text>
 							<Text style={[styles.title, { textAlign: 'center', marginTop: -5 }]}>{reading.chapter}</Text>
 						</View>
-					</View>
+					</View>}
+					{!hide && 
 					<View style={styles.bottomBar}>
 						<TouchableOpacity onPress={handlePrevious} disabled={reading.chapter === 1}>
 							<Text style={[styles.title, { color: reading.chapter !== 1 ? 'white' : '#8f8f8f' }]}>Précedent</Text>
@@ -152,7 +150,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 								Suivant
 							</Text>
 						</TouchableOpacity>
-					</View>
+					</View>}
 					<FlatList
 						ref={flatListRef}
 						data={loadedImages}
@@ -216,6 +214,10 @@ const styles = StyleSheet.create({
 		width: '100%',
 		display: 'flex',
 		padding: 10,
+	},
+	loadingText: {
+		textAlign: 'center',
+		marginTop: '50%',
 	},
 });
 
