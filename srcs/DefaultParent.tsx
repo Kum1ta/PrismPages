@@ -1,16 +1,16 @@
 import React, {useState} from 'react';
-import {Text, View, StyleSheet, Image, TouchableOpacity, Dimensions} from 'react-native';
+import {View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import HomePage from './HomePage';
 import ScanPage from './ScanPage';
 import ReadingPage from './ReadingPage';
-
+import InProgressPage from './InProgressPage';
 
 const DefaultParent = () =>
 {
 	const	[buttonSelectedId, setButtonSelectedId] = useState(1);
 	const	[selectedScan, setSelectedScan] = useState(null);
 	const	[reading, setReading] = useState({bool: false, scan: null, chapter: 1});
-	const	page = [null, <HomePage setSelectedScan={setSelectedScan}/>, null];
+	const	page = [<InProgressPage setSelectedScan={setSelectedScan}/>, <HomePage setSelectedScan={setSelectedScan}/>, null];
 
 	if (reading.bool)
 		return (<ReadingPage reading={reading} setReading={setReading} selectedScan={selectedScan}/>);
@@ -28,9 +28,9 @@ const DefaultParent = () =>
 				{page[buttonSelectedId]}
 			</View>
 			<View style={styles.container}>
-				{createButton(() => setButtonSelectedId(0), require('../assets/icons/home.png'), 0, buttonSelectedId)}
+				{createButton(() => setButtonSelectedId(0), require('../assets/icons/reading.png'), 0, buttonSelectedId)}
 				{createButton(() => setButtonSelectedId(1), require('../assets/icons/home.png'), 1, buttonSelectedId)}
-				{createButton(() => setButtonSelectedId(2), require('../assets/icons/home.png'), 2, buttonSelectedId)}
+				{createButton(() => setButtonSelectedId(2), require('../assets/icons/settings.png'), 2, buttonSelectedId)}
 			</View>
 		</View>
 	);

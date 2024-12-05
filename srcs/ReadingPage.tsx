@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
@@ -14,6 +15,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 
 	useEffect(() => {
 		setHide(false);
+		addToHistory(selectedScan, reading.chapter);
 		for (let index: number = 0; index < reading.scan['eps' + reading.chapter].length; index++)
 		{
 			const uri = reading.scan['eps' + reading.chapter][index];
@@ -156,8 +158,8 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 						data={loadedImages}
 						keyExtractor={(item, index) => index.toString()}
 						renderItem={renderItem}
-						initialNumToRender={5}
-						maxToRenderPerBatch={5}
+						initialNumToRender={1}
+						maxToRenderPerBatch={1}
 						windowSize={10}
 						style={styles.flatList}
 					/>
@@ -166,7 +168,20 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		</View>
 	);
 };
-  
+
+function addToHistory(scan: any, chapter: number)
+{
+	console.log(scan);
+	const validName = scan[1].replace(/[^a-zA-Z0-9]/g, '');
+	const history = {
+		name: scan[1],
+		imgUrl: scan[2],
+		chapter: chapter,
+		pageUrl: scan[0],
+	};
+	AsyncStorage.setItem(validName, JSON.stringify(history));
+}
+
 
 const styles = StyleSheet.create({
 	body: {

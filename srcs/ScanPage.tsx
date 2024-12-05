@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {ScrollView, StyleSheet, Text, BackHandler, TouchableOpacity, View, Image} from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { parseDocument } from 'htmlparser2';
 import { selectOne } from 'css-select';
 
@@ -15,25 +16,24 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 	const	[scanData, setScanData] = useState(null);
 	const	[nbChapter, setNbChapter] = useState(0);
 	const	[synopsis, setSynopsis] = useState(null);
+	const	[resume, setResume] = useState(null);
 	let		data = {};
 	let		website = 'https://anime-sama.fr/catalogue/';
 
 	useEffect(() => {
+		fetchResume(scan[1]).then((data) => setResume(data));
 		function onBackPress()
 		{
 			setSelectedScan(null);
 			return (true);
 		}
-		BackHandler.addEventListener('hardwareBackPress', onBackPress);
-		return (() => BackHandler.removeEventListener('hardwareBackPress', onBackPress));
-	});
-	if (!scan[0].includes('/scan/vf/episodes.js'))
-		scan[0] += "/scan/vf/episodes.js";
-	if (!scanData)
-	{
 		getDataChapters(data, scan, setScanData, setNbChapter);
 		getSynopsis(website, scan, setSynopsis);
-	}
+		BackHandler.addEventListener('hardwareBackPress', onBackPress);
+		return (() => BackHandler.removeEventListener('hardwareBackPress', onBackPress));
+	}, []);
+	if (!scan[0].includes('/scan/vf/episodes.js'))
+		scan[0] += "/scan/vf/episodes.js";
 	return (
 		<View style={styles.body}>
 			<View style={styles.imgTop}>
@@ -55,9 +55,14 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 				/>
 				<Text style={styles.titleScan}>{scan[1]}</Text>
 			</View>
-			<ScrollView>
+			<ScrollView style={{width: '100%'}}>
+				{resume && 
+					<TouchableOpacity onPress={() => setReading({bool: true, scan: scanData, chapter: resume.chapter})}>
+						<Text style={styles.resumeButton}>Reprendre - CHAP {resume.chapter}</Text>
+					</TouchableOpacity>
+				}
 				<Text style={styles.h2Text}>Synopsis</Text>
-				<Text style={styles.synopsis}>{synopsis}</Text>
+				{synopsis ? <Text style={styles.synopsis}>{synopsis}</Text> : <Text style={styles.synopsis}>Chargement...</Text>}
 				<Text style={styles.h2Text}>Chapitres</Text>
 				<View style={styles.chapScrollView}>
 					{Array.from({ length: nbChapter }, (_, index) => (
@@ -70,6 +75,19 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 		</View>
 	);
 }
+
+async function fetchResume(name: string)
+{
+	const	validName = name.replace(/[^a-zA-Z0-9]/g, '');
+
+	try {
+	  const progress = await AsyncStorage.getItem(validName);
+	  console.log(progress);
+	  return (progress ? JSON.parse(progress) : null);
+	} catch (e) {
+		return (null);
+	}
+};
 
 function removeAllComments(text: string, comment: string)
 {
@@ -359,6 +377,18 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		marginLeft: '5%',
 		marginRight: '5%',
+	},
+	resumeButton: {
+		fontFamily: 'Jersey25-Regular',
+		fontSize: 20,
+		color: 'white',
+		backgroundColor: '#262626',
+		width: '90%',
+		textAlign: 'center',
+		alignSelf: 'center',
+		padding: 10,
+		borderRadius: 10,
+		marginTop: 10,
 	},
 });
 

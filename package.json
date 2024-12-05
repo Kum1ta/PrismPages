@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-vector-icons/common": "^11.0.0",
     "@react-native-vector-icons/fontawesome6": "^6.7.1",
     "htmlparser2": "^9.1.0",
@@ -21,7 +22,6 @@
     "react-native-inset-shadow": "^1.0.3",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-safe-area-context": "^4.12.0",
-    "react-native-svg": "^15.8.0",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-zoomable-view": "^0.3.1"
   },

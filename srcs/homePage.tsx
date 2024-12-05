@@ -11,7 +11,7 @@ let animeList: any = null;
 let interval: any = null;
 
 const HomePage = ({setSelectedScan}: any) => {
-	const [animes, setAnimes] = React.useState([]);
+	const [animes, setAnimes] = React.useState<any>([]);
 
 	React.useEffect(() => {
 		if (animeList)
@@ -62,7 +62,7 @@ function search(animes: any, text: string)
 
 function loading(animes: any)
 {
-	const [loadingText, setLoadingText] = React.useState("Loading...");
+	const [loadingText, setLoadingText] = React.useState("Chargement...");
 
 	if (!animes || animes.length === 0)
 	{
@@ -78,7 +78,7 @@ function loading(animes: any)
 			i++;
 			if (i > 3)
 				i = 0;
-			let text = "Loading";
+			let text = "Chargement";
 			for (let j = 0; j < i; j++)
 				text += ".";
 			setLoadingText(text);
@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 	},
 	imageScans: {
+		borderRadius: 10,
 		height: 150,
 	},
 	titleScans: {
