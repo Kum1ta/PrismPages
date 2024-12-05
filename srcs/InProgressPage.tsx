@@ -53,7 +53,6 @@ function createButton(data: any, setSelectedScan: Function, setAllProgress: Func
 					{
 						text: 'Supprimer',
 						onPress: async () => {
-							console.log('Suppression de la progression');
 							try {
 								const validName = name.replace(/[^a-zA-Z0-9]/g, '');
 								await AsyncStorage.removeItem(validName);

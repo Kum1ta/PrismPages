@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
-import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
 const width = Dimensions.get('window').width;
@@ -51,7 +50,6 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 						loadedImages.sort((a, b) => {
 							return a.localeCompare(b, undefined, { numeric: true });
 						});
-						console.log(loadedImages);
 						setLoadedImages([...loadedImages]);
 					}
 					else

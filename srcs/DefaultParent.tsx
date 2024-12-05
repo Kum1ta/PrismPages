@@ -4,13 +4,14 @@ import HomePage from './HomePage';
 import ScanPage from './ScanPage';
 import ReadingPage from './ReadingPage';
 import InProgressPage from './InProgressPage';
+import SettingsPage from './SettingsPage';
 
 const DefaultParent = () =>
 {
 	const	[buttonSelectedId, setButtonSelectedId] = useState(1);
 	const	[selectedScan, setSelectedScan] = useState(null);
 	const	[reading, setReading] = useState({bool: false, scan: null, chapter: 1});
-	const	page = [<InProgressPage setSelectedScan={setSelectedScan}/>, <HomePage setSelectedScan={setSelectedScan}/>, null];
+	const	page = [<InProgressPage setSelectedScan={setSelectedScan}/>, <HomePage setSelectedScan={setSelectedScan}/>, <SettingsPage />];
 
 	if (reading.bool)
 		return (<ReadingPage reading={reading} setReading={setReading} selectedScan={selectedScan}/>);

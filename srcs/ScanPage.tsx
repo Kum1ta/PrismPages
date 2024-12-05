@@ -16,7 +16,7 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 	const	[scanData, setScanData] = useState(null);
 	const	[nbChapter, setNbChapter] = useState(0);
 	const	[synopsis, setSynopsis] = useState(null);
-	const	[resume, setResume] = useState(null);
+	const	[resume, setResume] = useState<any>(null);
 	let		data = {};
 	let		website = 'https://anime-sama.fr/catalogue/';
 
@@ -32,6 +32,7 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 		BackHandler.addEventListener('hardwareBackPress', onBackPress);
 		return (() => BackHandler.removeEventListener('hardwareBackPress', onBackPress));
 	}, []);
+
 	if (!scan[0].includes('/scan/vf/episodes.js'))
 		scan[0] += "/scan/vf/episodes.js";
 	return (
