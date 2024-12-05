@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const	height = Dimensions.get('window').height;
@@ -24,7 +24,7 @@ function InProgressPage({setSelectedScan}: any)
 			<ScrollView style={styles.scrollview}>
 				{allProgress.map((progress: any) => (
 					<React.Fragment key={progress.name}>
-						{createButton(progress.data, setSelectedScan)}
+						{createButton(progress.data, setSelectedScan, setAllProgress)}
 					</React.Fragment>
 				))}
 			</ScrollView>
@@ -32,7 +32,7 @@ function InProgressPage({setSelectedScan}: any)
 	);
 }
 
-function createButton(data: any, setSelectedScan: Function)
+function createButton(data: any, setSelectedScan: Function, setAllProgress: Function)
 {
 	const	name = data.name;
 	const	chapter = data.chapter;
@@ -40,9 +40,37 @@ function createButton(data: any, setSelectedScan: Function)
 	const	pageUrl = data.pageUrl;
 
 	return (
-		<TouchableOpacity onPress={() => {
-			setSelectedScan([pageUrl, name, imgUrl]);
-		}}>
+		<TouchableOpacity
+			onPress={() => {
+				setSelectedScan([pageUrl, name, imgUrl]);
+			}}
+			onLongPress={() => {
+				Alert.alert('Supprimer', 'Voulez-vous supprimer cette progression ?', [
+					{
+						text: 'Annuler',
+						style: 'cancel',
+					},
+					{
+						text: 'Supprimer',
+						onPress: async () => {
+							console.log('Suppression de la progression');
+							try {
+								const validName = name.replace(/[^a-zA-Z0-9]/g, '');
+								await AsyncStorage.removeItem(validName);
+								const data = await listAllProgress();
+								if (data)
+								{
+									const sortedData = data.sort((a: any, b: any) => b.data.time - a.data.time);
+									setAllProgress(sortedData);
+								}
+							} catch (error) {
+								console.log(error);
+							}
+						},
+					},
+				]);
+			}}
+		>
 			<View style={styles.line}>
 				<Image source={{uri: imgUrl}} style={styles.imageScan}/>
 				<View style={styles.lineContent}>
