@@ -1,17 +1,19 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { WebView } from 'react-native-webview';
 import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
 const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
 
 const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	const [hide, setHide] = useState(false);
 	const [imageHeights, setImageHeights] = useState<Record<number, number>>({});
 	const [loadedImages, setLoadedImages] = useState<string[]>([]);
 	const [textLoading, setTextLoading] = useState<string>(`Loading 0/${reading.scan['eps' + reading.chapter].length} images`);
-	const flatListRef = useRef(null);
+	const flatListRef = useRef<FlatList>(null);
 
 	useEffect(() => {
 		setHide(false);
@@ -49,6 +51,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 						loadedImages.sort((a, b) => {
 							return a.localeCompare(b, undefined, { numeric: true });
 						});
+						console.log(loadedImages);
 						setLoadedImages([...loadedImages]);
 					}
 					else
@@ -63,7 +66,6 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 			setReading({ bool: false, scan: null, chapter: 1 });
 			return (true);
 		}
-
 		BackHandler.addEventListener('hardwareBackPress', onBackPress);
 		return (() => {BackHandler.removeEventListener('hardwareBackPress', onBackPress)});
 	}, [reading.chapter]);
@@ -100,29 +102,31 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		setReading({ bool: true, scan: reading.scan, chapter: reading.chapter + 1 });
 	}, [reading, setReading]);
 
-	const renderItem = useCallback(
-		({ item, index } :any) => (
-			<TouchableWithoutFeedback onPress={() => {setHide(!hide); console.log('hide:', hide);}}>
-				<FastImage
-					source={{
-						uri: item,
-						priority: index === 0 ? FastImage.priority.high : FastImage.priority.low,
-					}}
-					style={{
-						width: width,
-						height: imageHeights[index],
-					}}
-					resizeMode={FastImage.resizeMode.contain}
-				/>
-			</TouchableWithoutFeedback>
-		),
-		[imageHeights, calculateImageHeight]
-	);
-
 	const topBarTitle = useMemo(() => {
 		const title = selectedScan[1];
 		return (title.length > 20 ? `${title.slice(0, 20)}...` : title);
 	}, [selectedScan]);
+
+	const showScans = useCallback(() => {
+		return (
+			<TouchableWithoutFeedback
+				style={{ width: width, height: height }}
+				onLongPress={() => {
+					setHide(!hide);
+				}}
+			>
+				<WebView source={{html: `
+					<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #2A2D34;">
+						${loadedImages.map((img, index) => {return `<img src="${img}" style="width: 100%" />` }).join('')}
+					</body>
+				`, baseUrl: ''}} 
+				originWhitelist={['*']}
+				allowFileAccess={true}
+				allowFileAccessFromFileURLs={true}
+			/>
+			</TouchableWithoutFeedback>
+		);
+	}, [reading.chapter, hide]);
 
 	return (
 		<View style={styles.body}>
@@ -153,16 +157,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 							</Text>
 						</TouchableOpacity>
 					</View>}
-					<FlatList
-						ref={flatListRef}
-						data={loadedImages}
-						keyExtractor={(item, index) => index.toString()}
-						renderItem={renderItem}
-						initialNumToRender={1}
-						maxToRenderPerBatch={1}
-						windowSize={10}
-						style={styles.flatList}
-					/>
+					{showScans()}
 				</>
 			)}
 		</View>
@@ -171,13 +166,13 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 
 function addToHistory(scan: any, chapter: number)
 {
-	console.log(scan);
 	const validName = scan[1].replace(/[^a-zA-Z0-9]/g, '');
 	const history = {
 		name: scan[1],
 		imgUrl: scan[2],
 		chapter: chapter,
 		pageUrl: scan[0],
+		time: new Date().getTime(),
 	};
 	AsyncStorage.setItem(validName, JSON.stringify(history));
 }

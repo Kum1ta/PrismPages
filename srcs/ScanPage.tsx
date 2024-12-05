@@ -82,7 +82,6 @@ async function fetchResume(name: string)
 
 	try {
 	  const progress = await AsyncStorage.getItem(validName);
-	  console.log(progress);
 	  return (progress ? JSON.parse(progress) : null);
 	} catch (e) {
 		return (null);

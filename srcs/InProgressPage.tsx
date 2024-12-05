@@ -9,7 +9,13 @@ function InProgressPage({setSelectedScan}: any)
 	let [allProgress, setAllProgress] = React.useState<any>([]);
 
 	useEffect(() => {
-		listAllProgress().then((data) => setAllProgress(data));
+		listAllProgress().then((data) => {
+			if (data)
+			{
+				const sortedData = data.sort((a: any, b: any) => b.data.time - a.data.time);
+				setAllProgress(sortedData);
+			}
+		});
 	}, []);
 
 	return (
@@ -70,7 +76,7 @@ const listAllProgress = async () => {
 const styles = StyleSheet.create({
 	body: {
 		width: '100%',
-		height: height - 75,
+		height: height - 60,
 	},
 	titlePage: {
 		color: 'white',

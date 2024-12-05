@@ -133,7 +133,7 @@ async function fetchAnimeSama()
 const styles = StyleSheet.create({
 	container: {
 		width: '100%',
-		height: height - 75,
+		height: height - 60,
 		padding: 10,
 		display: 'flex',
 		flexDirection: 'column',

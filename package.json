@@ -23,6 +23,7 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-safe-area-context": "^4.12.0",
     "react-native-svg-transformer": "^1.5.0",
+    "react-native-webview": "^13.12.5",
     "react-native-zoomable-view": "^0.3.1"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "eslint": "^8.19.0",
     "jest": "^29.2.1",
     "prettier": "2.8.8",
+    "react-native-lazyload": "^1.1.0",
     "react-test-renderer": "18.3.1",
     "typescript": "5.0.4"
   },

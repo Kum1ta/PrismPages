@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		backgroundColor: '#262626',
-		height: 75,
+		height: 60,
 		width: '100%',
 		marginTop: 'auto',
 		display: 'flex',
@@ -75,13 +75,13 @@ const styles = StyleSheet.create({
 		paddingInline: 40,
 	},
 	button: {
-		height: 55,
-		width: 55,
+		height: 30,
+		width: 30,
 		tintColor: 'gray'
 	},
 	selectedButton: {
-		height: 58,
-		width: 58,
+		height: 35,
+		width: 35,
 		tintColor: 'white'
 	},
 });
