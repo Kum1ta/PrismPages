@@ -52,9 +52,10 @@ function search(animes: any, text: string)
 	if (!animes)
 		return;
 	let arr = [];
+	const lowerCaseText = text.toLowerCase();
 	for (let i = 0; i < animes.length; i++)
 	{
-		if (animes[i].name.includes(text))
+		if (animes[i].name.toLowerCase().includes(lowerCaseText))
 			arr.push(animes[i]);
 	}
 	return (arr);
