@@ -63,7 +63,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		}
 
 		BackHandler.addEventListener('hardwareBackPress', onBackPress);
-		return (() => {BackHandler.removeEventListener('hardwareBackPress', onBackPress); index = 0;});
+		return (() => {BackHandler.removeEventListener('hardwareBackPress', onBackPress)});
 	}, [reading.chapter]);
 
 	const calculateImageHeight = (uri: string, index: number) => {
