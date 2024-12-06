@@ -13,6 +13,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	const [loadedImages, setLoadedImages] = useState<string[]>([]);
 	const [textLoading, setTextLoading] = useState<string>(`Loading 0/${reading.scan['eps' + reading.chapter].length} images`);
 	const flatListRef = useRef<FlatList>(null);
+	const doubleTapRef = useRef<number>(0);
 
 	useEffect(() => {
 		setHide(false);
@@ -105,13 +106,23 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		return (title.length > 20 ? `${title.slice(0, 20)}...` : title);
 	}, [selectedScan]);
 
+	const doubleTap = () => {
+		const now = new Date().getTime();
+		const DOUBLE_PRESS_DELAY = 200;
+		if (now - DOUBLE_PRESS_DELAY < doubleTapRef.current)
+		{
+			setHide(!hide);
+			doubleTapRef.current = 0;
+		}
+		else
+			doubleTapRef.current = now;
+	}
+
 	const showScans = useCallback(() => {
 		return (
 			<TouchableWithoutFeedback
 				style={{ width: width, height: height }}
-				onLongPress={() => {
-					setHide(!hide);
-				}}
+				onPress={() => doubleTap()}
 			>
 				<WebView source={{html: `
 					<html>
@@ -121,16 +132,15 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 					<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #2A2D34;">
 						${loadedImages.map((img, index) => {return `<img src="${img}" style="width: 100%" />` }).join('')}
 						<script>
-                        let lastTap = 0;
-                        document.addEventListener('touchend', function (e) {
-                            const currentTime = new Date().getTime();
-                            const tapLength = currentTime - lastTap;
-                            if (tapLength < 300 && tapLength > 0) {
-                                e.preventDefault(); // Bloque le double tap
-                            }
-                            lastTap = currentTime;
-                        });
-                    </script>
+							let lastTap = 0;
+							document.addEventListener('touchend', (e) => {
+								const currentTime = new Date().getTime();
+								const tapLength = currentTime - lastTap;
+								if (tapLength < 300 && tapLength > 0)
+									e.preventDefault();
+								lastTap = currentTime;
+							});
+						</script>
 					</body>
 					</html>
 				`, baseUrl: ''}} 
