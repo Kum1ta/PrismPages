@@ -114,14 +114,30 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 				}}
 			>
 				<WebView source={{html: `
+					<html>
+					<head>
+						<meta name="viewport" content="width=device-width, initial-scale=1.0">
+					</head>
 					<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #2A2D34;">
 						${loadedImages.map((img, index) => {return `<img src="${img}" style="width: 100%" />` }).join('')}
+						<script>
+                        let lastTap = 0;
+                        document.addEventListener('touchend', function (e) {
+                            const currentTime = new Date().getTime();
+                            const tapLength = currentTime - lastTap;
+                            if (tapLength < 300 && tapLength > 0) {
+                                e.preventDefault(); // Bloque le double tap
+                            }
+                            lastTap = currentTime;
+                        });
+                    </script>
 					</body>
+					</html>
 				`, baseUrl: ''}} 
 				originWhitelist={['*']}
 				allowFileAccess={true}
 				allowFileAccessFromFileURLs={true}
-			/>
+				/>
 			</TouchableWithoutFeedback>
 		);
 	}, [reading.chapter, hide]);
