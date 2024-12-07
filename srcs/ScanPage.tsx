@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, Text, BackHandler, TouchableOpacity, View, Image} from 'react-native';
+import {ScrollView, StyleSheet, Text, BackHandler, TouchableOpacity, View, Image, Platform} from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { parseDocument } from 'htmlparser2';
 import { selectOne } from 'css-select';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /*
 	scan[0] = pageUrl
@@ -11,12 +12,15 @@ import { selectOne } from 'css-select';
 	scan[2] = imgUrl
 */
 
+const userOnIOS = Platform.OS === 'ios';
+
 function ScanPage({scan, setSelectedScan, setReading}: any)
 {
 	const	[scanData, setScanData] = useState(null);
 	const	[nbChapter, setNbChapter] = useState(0);
 	const	[synopsis, setSynopsis] = useState(null);
 	const	[resume, setResume] = useState<any>(null);
+	const	insets = useSafeAreaInsets();
 	let		data = {};
 	let		website = 'https://anime-sama.fr/catalogue/';
 
@@ -37,13 +41,16 @@ function ScanPage({scan, setSelectedScan, setReading}: any)
 		scan[0] += "/scan/vf/episodes.js";
 	return (
 		<View style={styles.body}>
-			<View style={styles.imgTop}>
-				<TouchableOpacity onPress={() => setSelectedScan(null)} style={styles.arrowBack}>
+			<View style={[styles.imgTop, {height: 200 + insets.top}]}>
+				<TouchableOpacity onPress={() => setSelectedScan(null)} style={[styles.arrowBack, {marginTop: insets.top}]}>
 					<Image source={require('../assets/icons/arrow.png')} style={{width: '100%', height: '100%'}}/>
 				</TouchableOpacity>
 				<Image source={{uri: scan[2]}} style={{width: '100%', height: '100%'}}/>
 				<LinearGradient
-					colors={['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)']}
+					colors={userOnIOS ? 
+						['rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)'] :
+						['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)']
+					}
 					style={styles.gradientOverlay}
 					start={{ x: 0.5, y: 0 }}
 					end={{ x: 0.5, y: 1 }}
@@ -307,7 +314,6 @@ const styles = StyleSheet.create({
 	},
 	imgTop: {
 		width: '100%',
-		height: 200,
 		marginBottom: 15,
 	},
 	shadow: {

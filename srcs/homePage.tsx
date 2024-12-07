@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
-import {Text, View, StyleSheet, TextInput, ScrollView, TouchableOpacity, FlatList, Dimensions} from 'react-native';
+import {Text, View, StyleSheet, TextInput, TouchableOpacity, FlatList, Dimensions} from 'react-native';
 import { Image } from 'react-native';
 import { parseDocument } from 'htmlparser2';
 import { selectAll, selectOne } from 'css-select';
-const { height } = Dimensions.get('window');
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const height = Dimensions.get('window').height;
 
 const urlAnimeSama = 'https://anime-sama.fr/catalogue/listing_all.php';
 
@@ -12,6 +14,7 @@ let interval: any = null;
 
 const HomePage = ({setSelectedScan}: any) => {
 	const [animes, setAnimes] = React.useState<any>([]);
+	const insets = useSafeAreaInsets();
 
 	React.useEffect(() => {
 		if (animeList)
@@ -25,7 +28,7 @@ const HomePage = ({setSelectedScan}: any) => {
 		});
 	}, []);
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {paddingTop: insets.top}]}>
 			<Text style={styles.titleText}>PrismPages</Text>
 			<TextInput
 				style={styles.searchBar}
@@ -136,6 +139,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: height - 60,
 		padding: 10,
+		paddingTop: 0,
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',

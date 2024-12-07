@@ -1,12 +1,14 @@
 import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const	height = Dimensions.get('window').height;
 
 function InProgressPage({setSelectedScan}: any)
 {
 	let [allProgress, setAllProgress] = React.useState<any>([]);
+	const insets = useSafeAreaInsets();
 
 	useEffect(() => {
 		listAllProgress().then((data) => {
@@ -19,7 +21,7 @@ function InProgressPage({setSelectedScan}: any)
 	}, []);
 
 	return (
-		<View style={styles.body}>
+		<View style={[styles.body, {paddingTop: insets.top}]}>
 			<Text style={styles.titlePage}>Reprendre</Text>
 			<ScrollView style={styles.scrollview}>
 				{allProgress.map((progress: any) => (

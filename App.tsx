@@ -1,9 +1,13 @@
 import React from 'react';
-import {DefaultParent} from './srcs/DefaultParent';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import DefaultParent from './srcs/DefaultParent';
 
 const Default = () => {
 	return (
-		<DefaultParent />
+		<SafeAreaProvider>
+			<DefaultParent />
+		</SafeAreaProvider>
 	);
 };
 

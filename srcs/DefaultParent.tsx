@@ -5,6 +5,7 @@ import ScanPage from './ScanPage';
 import ReadingPage from './ReadingPage';
 import InProgressPage from './InProgressPage';
 import SettingsPage from './SettingsPage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DefaultParent = () =>
 {
@@ -12,6 +13,7 @@ const DefaultParent = () =>
 	const	[selectedScan, setSelectedScan] = useState(null);
 	const	[reading, setReading] = useState({bool: false, scan: null, chapter: 1});
 	const	page = [<InProgressPage setSelectedScan={setSelectedScan}/>, <HomePage setSelectedScan={setSelectedScan}/>, <SettingsPage />];
+	const	insets = useSafeAreaInsets();
 
 	if (reading.bool)
 		return (<ReadingPage reading={reading} setReading={setReading} selectedScan={selectedScan}/>);
@@ -87,4 +89,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export {DefaultParent};
+export default DefaultParent;

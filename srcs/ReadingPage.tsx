@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StatusBar, Image, Dimensions, StyleSheet, BackHandler, TouchableWithoutFeedback, Platform, Pressable} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
+import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
+const userOnIOS = Platform.OS === 'ios';
 
 const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	const [hide, setHide] = useState(false);
@@ -21,11 +23,8 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		for (let index: number = 0; index < reading.scan['eps' + reading.chapter].length; index++)
 		{
 			const uri = reading.scan['eps' + reading.chapter][index];
-			calculateImageHeight(uri, index);
-
 			let fileName = selectedScan[1].replace(/[^a-zA-Z0-9]/g, '') + '-' + reading.chapter + '-' + (index + 1);
 			const localPath = `file://${RNFS.CachesDirectoryPath}/${fileName}.jpg`;
-
 			RNFS.exists(localPath).then((exists) => {
 				new Promise((resolve) => {
 					if (exists)
@@ -46,15 +45,17 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 						});
 					}
 				}).then(() => {
-					if (loadedImages.length === reading.scan['eps' + reading.chapter].length)
-					{
-						loadedImages.sort((a, b) => {
-							return a.localeCompare(b, undefined, { numeric: true });
-						});
-						setLoadedImages([...loadedImages]);
-					}
-					else
-						setTextLoading(`Loading ${loadedImages.length}/${reading.scan['eps' + reading.chapter].length} images`);
+					calculateImageHeight(localPath, index).then(() => {
+						if (loadedImages.length === reading.scan['eps' + reading.chapter].length)
+						{
+							loadedImages.sort((a, b) => {
+								return (a.localeCompare(b, undefined, { numeric: true }));
+							});
+							setLoadedImages([...loadedImages]);
+						}
+						else
+							setTextLoading(`Loading ${loadedImages.length}/${reading.scan['eps' + reading.chapter].length} images`);
+					});
 				});
 			}).catch((err) => {
 				console.error(err);
@@ -70,19 +71,22 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	}, [reading.chapter]);
 
 	const calculateImageHeight = (uri: string, index: number) => {
-		Image.getSize(
-			uri,
-			(originalWidth, originalHeight) => {
-				const calculatedHeight = (originalHeight / originalWidth) * width;
-				setImageHeights((prevHeights) => ({
-					...prevHeights,
-					[index]: calculatedHeight,
-				}));
-			},
-			(error) => {
-				console.error(`Couldn't get the image size: ${error.message}`);
-			}
-		);
+		return new Promise((resolve) => {
+			Image.getSize(
+				uri,
+				(originalWidth, originalHeight) => {
+					const calculatedHeight = (originalHeight / originalWidth) * width;
+					setImageHeights((prevHeights) => ({
+						...prevHeights,
+						[index]: calculatedHeight,
+					}));
+					resolve(null);
+				},
+				(error) => {
+					console.error(`Couldn't get the image size: ${error.message}`);
+				}
+			);
+		});
 	};
 
 	const handlePrevious = useCallback(() => {
@@ -118,39 +122,72 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 			doubleTapRef.current = now;
 	}
 
+
 	const showScans = useCallback(() => {
+		if (userOnIOS)
+		{
+			return (
+					<FlatList
+						ref={flatListRef}
+						data={loadedImages}
+						keyExtractor={(item, index) => index.toString()}
+						renderItem={({ item, index }) => {
+							return (
+								<Pressable onPress={() => doubleTap()} style={{margin: 0, padding: 0}}>
+									<FastImage
+										source={{ uri: item }}
+										style={{ width: width, height: imageHeights[index], margin: 0, padding: 0}}
+										resizeMode={FastImage.resizeMode.contain}
+									/>
+								</Pressable>
+							);
+						}}
+						initialNumToRender={5}
+						maxToRenderPerBatch={5}
+						windowSize={10}
+						style={styles.flatList}
+					/>
+			);
+		}
 		return (
 			<TouchableWithoutFeedback
 				style={{ width: width, height: height }}
 				onPress={() => doubleTap()}
 			>
-				<WebView source={{html: `
-					<html>
-					<head>
-						<meta name="viewport" content="width=device-width, initial-scale=1.0">
-					</head>
-					<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #2A2D34;">
-						${loadedImages.map((img, index) => {return `<img src="${img}" style="width: 100%" />` }).join('')}
-						<script>
-							let lastTap = 0;
-							document.addEventListener('touchend', (e) => {
-								const currentTime = new Date().getTime();
-								const tapLength = currentTime - lastTap;
-								if (tapLength < 300 && tapLength > 0)
-									e.preventDefault();
-								lastTap = currentTime;
-							});
-						</script>
-					</body>
-					</html>
-				`, baseUrl: ''}} 
-				originWhitelist={['*']}
-				allowFileAccess={true}
-				allowFileAccessFromFileURLs={true}
+				<WebView
+					source={{html: `
+						<html>
+							<head>
+								<meta name="viewport" content="width=device-width, initial-scale=1.0">
+							</head>
+							<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #2A2D34;">
+								${loadedImages.map((img, index) => {
+									return (`<img src="${img}" style="width: 100%" />`);
+								}).join('')}
+								<script>
+									let lastTap = 0;
+									document.addEventListener('touchend', (e) => {
+										const currentTime = new Date().getTime();
+										const tapLength = currentTime - lastTap;
+										if (tapLength < 300 && tapLength > 0)
+											e.preventDefault();
+										lastTap = currentTime;
+									});
+								</script>
+							</body>
+						</html>
+					`, baseUrl: ''}} 
+					originWhitelist={['*']}
+					javaScriptEnabled={true} 
+					domStorageEnabled={true}
+					allowUniversalAccessFromFileURLs={true}
+					allowFileAccess={true}
+					loadFileURL={true}
+					allowFileAccessFromFileURLs={true}
 				/>
 			</TouchableWithoutFeedback>
 		);
-	}, [reading.chapter, hide]);
+	}, [reading.chapter, loadedImages]);
 
 	return (
 		<View style={styles.body}>
@@ -165,7 +202,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 							<Image source={require('../assets/icons/arrow.png')} style={{ width: '100%', height: '100%' }} />
 						</TouchableOpacity>
 						<Text style={styles.title}>{topBarTitle}</Text>
-						<View style={{ position: 'absolute', right: 15 }}>
+						<View style={{ marginLeft: 'auto', marginRight: 10 }}>
 							<Text style={[styles.title, { textAlign: 'center' }]}>CHAP</Text>
 							<Text style={[styles.title, { textAlign: 'center', marginTop: -5 }]}>{reading.chapter}</Text>
 						</View>
@@ -210,7 +247,9 @@ const styles = StyleSheet.create({
 	},
 	topBar: {
 		width: '100%',
-		height: 60,
+		paddingTop: userOnIOS ? 60 : 0,
+		height: userOnIOS ? 100 : 60,
+		paddingBottom: 10,
 		position: 'absolute',
 		backgroundColor: '#262626',
 		flexDirection: 'row',
@@ -247,12 +286,16 @@ const styles = StyleSheet.create({
 	flatList: {
 		width: '100%',
 		display: 'flex',
-		padding: 10,
 	},
 	loadingText: {
 		textAlign: 'center',
 		marginTop: '50%',
 	},
+	imageContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
   export default React.memo(ReadingPage);

@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from "react";
 import {View, Text, StyleSheet, Button, Touchable, TouchableOpacity, Image, Alert} from "react-native";
 import RNFS from 'react-native-fs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function SettingsPage()
 {
 	const	[cacheSize, setCacheSize] = useState(0);
+	const	insets = useSafeAreaInsets();
 
 	useEffect(() => {
 		getCacheSize(setCacheSize);
 	}, [cacheSize]);
 	return (
-		<View style={styles.body}>
+		<View style={[styles.body, {paddingTop: insets.top}]}>
 			<Text style={styles.titlePage}>Paramètres</Text>
 			<Text style={styles.h1}>Global</Text>
 			<View style={styles.line}>
