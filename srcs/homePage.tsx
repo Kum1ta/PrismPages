@@ -13,7 +13,7 @@ let animeList: any = null;
 let interval: any = null;
 
 const HomePage = ({setSelectedScan}: any) => {
-	const [animes, setAnimes] = React.useState<any>([]);
+	const [animes, setAnimes] = useState<any>([]);
 	const insets = useSafeAreaInsets();
 
 	React.useEffect(() => {
@@ -66,7 +66,7 @@ function search(animes: any, text: string)
 
 function loading(animes: any)
 {
-	const [loadingText, setLoadingText] = React.useState("Chargement...");
+	const [loadingText, setLoadingText] = useState("Chargement...");
 
 	if (!animes || animes.length === 0)
 	{

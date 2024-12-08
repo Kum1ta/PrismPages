@@ -8,10 +8,20 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+inhibit_all_warnings!
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+end
+
+pre_install do |installer|
+  installer.pod_targets.each do |pod|
+    if pod.name.eql?('React-Core')
+      def pod.build_type; Pod::BuildType.static_library end
+    end
+  end
 end
 
 target 'PrismPages' do
@@ -29,6 +39,13 @@ target 'PrismPages' do
   end
 
   post_install do |installer|
+    # Fix architectures arm64
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
+
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,

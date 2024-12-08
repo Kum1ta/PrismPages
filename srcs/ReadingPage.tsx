@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 import FastImage from 'react-native-fast-image';
 import RNFS from 'react-native-fs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -16,6 +17,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 	const [textLoading, setTextLoading] = useState<string>(`Loading 0/${reading.scan['eps' + reading.chapter].length} images`);
 	const flatListRef = useRef<FlatList>(null);
 	const doubleTapRef = useRef<number>(0);
+	const insets = useSafeAreaInsets();
 
 	useEffect(() => {
 		setHide(false);
@@ -115,7 +117,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 		const DOUBLE_PRESS_DELAY = 200;
 		if (now - DOUBLE_PRESS_DELAY < doubleTapRef.current)
 		{
-			setHide(!hide);
+			setHide(prevHide => !prevHide);
 			doubleTapRef.current = 0;
 		}
 		else
@@ -197,7 +199,7 @@ const ReadingPage = ({ reading, setReading, selectedScan }: any) => {
 				<>
 					<StatusBar hidden={hide} />
 					{!hide && 
-					<View style={styles.topBar}>
+					<View style={[styles.topBar, {height: 60 + insets.top, paddingTop: insets.top + 10}]}>
 						<TouchableOpacity onPress={() => setReading({ bool: false, scan: null, chapter: 1 })} style={styles.arrowBack}>
 							<Image source={require('../assets/icons/arrow.png')} style={{ width: '100%', height: '100%' }} />
 						</TouchableOpacity>
@@ -247,8 +249,6 @@ const styles = StyleSheet.create({
 	},
 	topBar: {
 		width: '100%',
-		paddingTop: userOnIOS ? 60 : 0,
-		height: userOnIOS ? 100 : 60,
 		paddingBottom: 10,
 		position: 'absolute',
 		backgroundColor: '#262626',
