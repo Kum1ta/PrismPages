@@ -2,6 +2,10 @@
 
 Une application faite avec React Native pour lire des scans en français.
 
+<div align="center">
+  <img style="height: 200px; width: 200px; margin-bottom: 50px" src="https://github.com/user-attachments/assets/ddbdb4d9-81e3-41f8-a66b-4df1f34b03db"/>
+</div>
+
 Une interface simple, sans pub et sans superflu pour lire vos mangas et webtoons préférés. Basée sur le site d'[Anime-Sama](https://anime-sama.fr/).
 
 ## Compatibilité
@@ -11,13 +15,13 @@ Une interface simple, sans pub et sans superflu pour lire vos mangas et webtoons
 
 ## Captures d'écrans
 <div style="display: flex; flex-direction: row;">
-  <img style="width: 32%;" src="https://github.com/user-attachments/assets/4dfec110-d961-41be-9945-ae188f7149cd">
-  <img style="width: 32%;" src="https://github.com/user-attachments/assets/c2fc823a-c92f-4c89-84bb-a6b64d1e34eb">
-  <img style="width: 32%;" src="https://github.com/user-attachments/assets/784d86b9-a820-4392-9585-8efe1acee3fb">
+  <img style="width: 32%;" src="https://github.com/user-attachments/assets/4dfec110-d961-41be-9945-ae188f7149cd"/>
+  <img style="width: 32%;" src="https://github.com/user-attachments/assets/c2fc823a-c92f-4c89-84bb-a6b64d1e34eb"/>
+  <img style="width: 32%;" src="https://github.com/user-attachments/assets/784d86b9-a820-4392-9585-8efe1acee3fb"/>
 </div>
 <div style="display: flex; flex-direction: row;">
-  <img style="width: 32%;" src="https://github.com/user-attachments/assets/8f8fb134-5107-4c6b-a975-a9f707b3b57f">
-  <img style="width: 32%;" src="https://github.com/user-attachments/assets/2777758c-73f5-41ff-acc8-47c41f346c5b">
+  <img style="width: 32%;" src="https://github.com/user-attachments/assets/8f8fb134-5107-4c6b-a975-a9f707b3b57f"/>
+  <img style="width: 32%;" src="https://github.com/user-attachments/assets/2777758c-73f5-41ff-acc8-47c41f346c5b"/>
 </div>
 
 ## Avertissement
@@ -30,4 +34,5 @@ Ce programme est distribué sous la licence MIT. Cela signifie que vous êtes li
 Pour plus de détails, consultez le fichier LICENSE inclus avec le projet.
 
 ## Auteur
-[Me](https://github.com/Kum1ta)
+- [Me](https://github.com/Kum1ta)
+- [Nnaik0](https://github.com/Nnaik0) (Design app icon)
