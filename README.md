@@ -35,4 +35,4 @@ Pour plus de détails, consultez le fichier LICENSE inclus avec le projet.
 
 ## Auteur
 - [Me](https://github.com/Kum1ta)
-- [Nnaik0](https://github.com/Nnaik0) (Design app icon)
+- [Nnaik0](https://github.com/Nnaik0) (Design icon)
