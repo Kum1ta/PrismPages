@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const height = Dimensions.get('window').height;
 
-const urlAnimeSama = 'https://anime-sama.fr/catalogue/listing_all.php';
+const urlAnimeSama = 'https://anime-sama.fr/catalogue/?type%5B0%5D=Scans&search=&page=';
 
 let animeList: any = null;
 let interval: any = null;
@@ -109,27 +109,37 @@ function newAnime(name: string, imgUrl: string, pageUrl: string, setSelectedScan
 
 async function fetchAnimeSama()
 {
-	const data = await fetch(urlAnimeSama);
-	let html = await data.text();
+	let page = 1;
 	let arr = [];
-	
-	const dom = parseDocument(html);
-	const scans = selectAll('.Scans', dom);
-	let i = 0;
-	for (; i < scans.length; i++)
-	{
-		const scan = scans[i];
-		let	scan_title;
-		let scan_img;
-		let scan_url;
 
-		scan_title = selectOne('h1', scan)?.children.length > 0 ? selectOne('h1', scan).children[0].data : null;
-		if (!scan_title)
-			continue;
-		scan_img = selectOne('img', scan)?.attribs.src;
-		scan_url = selectOne('a', scan)?.attribs.href;
-		if (scan_title && scan_img && scan_url)
-			arr.push({ name: scan_title, imgUrl: scan_img, pageUrl: scan_url });
+	while (true)
+	{
+		const data = await fetch(urlAnimeSama + page);
+		let html = await data.text();
+		const dom = parseDocument(html);
+
+		const scans = selectAll('#list_catalog', dom);
+		if (scans.length === 0)
+			break;
+		const anime = selectAll('.shrink-0', scans[0]);
+		if (anime.length === 0)
+			break;
+		for (let i = 0; i < anime.length; i++)
+		{
+			const scan = anime[i];
+			let	scan_title;
+			let scan_img;
+			let scan_url;
+
+			scan_title = selectOne('h1', scan)?.children.length > 0 ? selectOne('h1', scan).children[0].data : null;
+			if (!scan_title)
+				continue;
+			scan_img = selectOne('img', scan)?.attribs.src;
+			scan_url = selectOne('a', scan)?.attribs.href;
+			if (scan_title && scan_img && scan_url)
+				arr.push({ name: scan_title, imgUrl: scan_img, pageUrl: scan_url });
+		}
+		page++;
 	}
 	return (arr);
 }
